@@ -10,7 +10,7 @@
 :root {
   --bg: #f3f4f8; --surface: #ffffff; --ink: #1c2033; --muted: #6a6f87; --line: #e2e4ec;
   --zebra: #f8f9fc; --void: #eef0f5;
-  --accent: #d9530d; --accent-ink: #b8430a; --accent-wash: #fff1e8;
+  --accent: #d9530d; --accent-ink: #b8430a; --outfit: #b8430a; --event: #c2187a; --accent-wash: #fff1e8;
   --online: #3567c7; --hand: #8a4fb8;
   --f-display: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
   --f-body: "BIZ UDPGothic", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
@@ -18,12 +18,12 @@
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #11131b; --surface: #191c27; --ink: #e9eaf2; --muted: #9a9fb6; --line: #2b2f3e;
   --zebra: #1d2130; --void: #151821;
-  --accent: #ff8c4f; --accent-ink: #ffa77a; --accent-wash: #33231c;
+  --accent: #ff8c4f; --accent-ink: #ffa77a; --outfit: #ffa77a; --event: #ff7ab8; --accent-wash: #33231c;
   --online: #7aa2ee; --hand: #c39be6; color-scheme: dark } }
 :root[data-theme="dark"] {
   --bg: #11131b; --surface: #191c27; --ink: #e9eaf2; --muted: #9a9fb6; --line: #2b2f3e;
   --zebra: #1d2130; --void: #151821;
-  --accent: #ff8c4f; --accent-ink: #ffa77a; --accent-wash: #33231c;
+  --accent: #ff8c4f; --accent-ink: #ffa77a; --outfit: #ffa77a; --event: #ff7ab8; --accent-wash: #33231c;
   --online: #7aa2ee; --hand: #c39be6; color-scheme: dark }
 
 * { box-sizing: border-box; }
@@ -85,6 +85,9 @@ a.xp:hover, a.xp:focus-visible { border-color: var(--accent); color: var(--accen
 .plan { font-size: .78rem; line-height: 1.35; color: var(--accent-ink); font-weight: 700;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; word-break: break-all; }
 .none { color: var(--muted); font-size: .74rem; }
+.plan .ft { color: var(--outfit); }
+.plan .pl { color: var(--event); }
+.plan .pj { color: var(--muted); font-weight: 400; }
 td.has-plan { box-shadow: inset 3px 0 0 var(--accent); }
 tbody tr td.has-plan { background: var(--accent-wash); }
 .star { color: var(--accent); margin-right: 2px; }
@@ -124,6 +127,7 @@ tbody tr td.has-plan { background: var(--accent-wash); }
   <div class="table-box" id="box"><div class="empty">企画を読み込んでいます…</div></div>
   <div class="legend">
     <span><i class="sw" style="background:var(--accent-wash);box-shadow:inset 3px 0 0 var(--accent)"></i>企画・服装あり</span>
+    <span><b style="color:var(--outfit)">服装</b>・<b style="color:var(--event)">企画</b>で文字色が違います</span>
     <span><b style="color:var(--accent)">★</b>本人のおすすめ部</span>
     <span>—＝告知なし</span>
     <span>𝕏 企画ポスト＝企画を告知した最新の投稿</span>
@@ -151,9 +155,15 @@ function renderTabs() {
       <span class="d">${e.md}<small>${e.wd}</small></span></button>`).join('');
 }
 
+const PLAN_RE = /企画|トーク|くじ|占い|似顔絵|イラスト|手紙|ラブレター|写真|質問|なぞなぞ|ビンゴ|おみくじ|プレゼント|語り|チャレンジ|メッセージ|BOX|作り/;
+function fmtPlan(label) {  // 「服＋企画」を服（オレンジ）と企画（緑）に色分け
+  return String(label).split(/[＋+]/).map((p, i) => p.trim()).filter(Boolean).map((p, i) =>
+    `<span class="${PLAN_RE.test(p) || i > 0 ? 'pl' : 'ft'}">${esc(p)}</span>`).join('<span class="pj">＋</span>');
+}
+
 function cellHtml(c) {
   if (!c) return '<td class="void"></td>';
-  if (c.plan) return `<td class="has-plan"><div class="plan" title="${esc(c.plan)}">${c.star ? '<span class="star">★</span>' : ''}${esc(c.plan)}</div></td>`;
+  if (c.plan) return `<td class="has-plan"><div class="plan" title="${esc(c.plan)}">${c.star ? '<span class="star">★</span>' : ''}${fmtPlan(c.plan)}</div></td>`;
   if (c.star) return '<td><span class="rec">★おすすめ</span></td>';
   return '<td><span class="none">—</span></td>';
 }
